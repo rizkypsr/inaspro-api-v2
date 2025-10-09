@@ -40,16 +40,12 @@ Route::middleware('auth:sanctum')->group(function () {
     // Cart routes
     Route::apiResource('carts', CartController::class);
     
-    // Cart items route for authenticated user
+    // Cart items routes for authenticated user
     Route::get('cart/items', [CartController::class, 'getItems'])->name('cart.items.index');
-    
-    // Cart items routes (nested under carts)
-    Route::prefix('carts/{cart}')->group(function () {
-        Route::post('items', [CartController::class, 'addItem'])->name('carts.items.store');
-        Route::put('items/{item}', [CartController::class, 'updateItem'])->name('carts.items.update');
-        Route::delete('items/{item}', [CartController::class, 'removeItem'])->name('carts.items.destroy');
-        Route::delete('items', [CartController::class, 'clearItems'])->name('carts.items.clear');
-    });
+    Route::post('cart/items', [CartController::class, 'addItem'])->name('cart.items.store');
+    Route::put('cart/items/{item}', [CartController::class, 'updateItem'])->name('cart.items.update');
+    Route::delete('cart/items/{item}', [CartController::class, 'removeItem'])->name('cart.items.destroy');
+    Route::delete('cart/items', [CartController::class, 'clearItems'])->name('cart.items.clear');
     
     // Order routes
     Route::apiResource('orders', OrderController::class);

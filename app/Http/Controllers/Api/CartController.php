@@ -194,16 +194,18 @@ class CartController extends Controller
     /**
      * Add item to cart.
      */
-    public function addItem(CartItemRequest $request, string $cartId): JsonResponse
+    public function addItem(CartItemRequest $request): JsonResponse
     {
         try {
             DB::beginTransaction();
 
-            // Verify cart exists
-            $cart = Cart::findOrFail($cartId);
+            $userId = auth()->id();
+
+            // Get or create cart for the authenticated user
+            $cart = Cart::firstOrCreate(['user_id' => $userId, 'status' => 'active']);
 
             // Check if item already exists in cart
-            $existingItem = CartItem::where('cart_id', $cartId)
+            $existingItem = CartItem::where('cart_id', $cart->id)
                 ->where('product_variant_id', $request->product_variant_id)
                 ->first();
 
@@ -215,7 +217,7 @@ class CartController extends Controller
             } else {
                 // Create new cart item
                 $cartItem = CartItem::create([
-                    'cart_id' => $cartId,
+                    'cart_id' => $cart->id,
                     'product_variant_id' => $request->product_variant_id,
                     'quantity' => $request->quantity,
                 ]);
@@ -233,19 +235,21 @@ class CartController extends Controller
     /**
      * Update cart item quantity.
      */
-    public function updateItem(CartItemRequest $request, string $cartId, string $itemId): JsonResponse
+    public function updateItem(CartItemRequest $request, string $itemId): JsonResponse
     {
         try {
             DB::beginTransaction();
 
-            // Check if cart exists
-            $cart = Cart::find($cartId);
+            $userId = auth()->id();
+
+            // Get cart for the authenticated user
+            $cart = Cart::where('user_id', $userId)->where('status', 'active')->first();
             if (!$cart) {
                 return $this->errorResponse('Cart not found', 404);
             }
 
             // Find cart item
-            $cartItem = CartItem::where('cart_id', $cartId)
+            $cartItem = CartItem::where('cart_id', $cart->id)
                 ->where('id', $itemId)
                 ->first();
 
@@ -287,12 +291,20 @@ class CartController extends Controller
     /**
      * Remove item from cart.
      */
-    public function removeItem(string $cartId, string $itemId): JsonResponse
+    public function removeItem(string $itemId): JsonResponse
     {
         try {
             DB::beginTransaction();
 
-            $cartItem = CartItem::where('cart_id', $cartId)
+            $userId = auth()->id();
+
+            // Get cart for the authenticated user
+            $cart = Cart::where('user_id', $userId)->where('status', 'active')->first();
+            if (!$cart) {
+                return $this->errorResponse('Cart not found', 404);
+            }
+
+            $cartItem = CartItem::where('cart_id', $cart->id)
                 ->where('id', $itemId)
                 ->firstOrFail();
 
@@ -310,16 +322,21 @@ class CartController extends Controller
     /**
      * Clear all items from cart.
      */
-    public function clearItems(string $cartId): JsonResponse
+    public function clearItems(): JsonResponse
     {
         try {
             DB::beginTransaction();
 
-            // Verify cart exists
-            $cart = Cart::findOrFail($cartId);
+            $userId = auth()->id();
+
+            // Get cart for the authenticated user
+            $cart = Cart::where('user_id', $userId)->where('status', 'active')->first();
+            if (!$cart) {
+                return $this->errorResponse('Cart not found', 404);
+            }
 
             // Delete all cart items
-            CartItem::where('cart_id', $cartId)->delete();
+            CartItem::where('cart_id', $cart->id)->delete();
 
             DB::commit();
 
