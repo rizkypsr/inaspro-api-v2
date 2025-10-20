@@ -68,9 +68,9 @@ class OrderController extends Controller
             'filters' => $request->only(['search', 'status', 'payment_status', 'date_from', 'date_to', 'sort_by', 'sort_order']),
             'statusOptions' => [
                 'pending' => 'Pending',
-                'processing' => 'Processing',
+                'paid' => 'Paid',
                 'shipped' => 'Shipped',
-                'delivered' => 'Delivered',
+                'completed' => 'Completed',
                 'cancelled' => 'Cancelled',
             ],
             'paymentStatusOptions' => [
@@ -112,9 +112,9 @@ class OrderController extends Controller
             'order' => $order,
             'statusOptions' => [
                 'pending' => 'Pending',
-                'processing' => 'Processing',
+                'paid' => 'Paid',
                 'shipped' => 'Shipped',
-                'delivered' => 'Delivered',
+                'completed' => 'Completed',
                 'cancelled' => 'Cancelled',
             ],
             'paymentStatusOptions' => [
@@ -132,7 +132,7 @@ class OrderController extends Controller
     public function update(Request $request, Order $order)
     {
         $validated = $request->validate([
-            'status' => ['sometimes', Rule::in(['pending', 'processing', 'shipped', 'delivered', 'cancelled'])],
+            'status' => ['sometimes', Rule::in(['pending', 'paid', 'shipped', 'completed', 'cancelled'])],
             'payment_status' => ['sometimes', Rule::in(['pending', 'paid', 'failed', 'refunded'])],
             'tracking_number' => ['sometimes', 'nullable', 'string', 'max:255'],
             'courier_name' => ['sometimes', 'nullable', 'string', 'max:255'],
@@ -166,7 +166,7 @@ class OrderController extends Controller
         $order->update($validated);
 
         // Automatically update status to shipped if tracking number is provided
-        if (in_array($order->status, ['pending', 'processing'])) {
+        if (in_array($order->status, ['pending', 'paid'])) {
             $order->update(['status' => 'shipped']);
         }
 
@@ -231,7 +231,7 @@ class OrderController extends Controller
             'order_ids' => ['required', 'array', 'min:1'],
             'order_ids.*' => ['required', 'integer', 'exists:orders,id'],
             'action' => ['required', 'string', Rule::in(['update_status', 'update_payment_status'])],
-            'status' => ['required_if:action,update_status', Rule::in(['pending', 'processing', 'shipped', 'delivered', 'cancelled'])],
+            'status' => ['required_if:action,update_status', Rule::in(['pending', 'paid', 'shipped', 'completed', 'cancelled'])],
             'payment_status' => ['required_if:action,update_payment_status', Rule::in(['pending', 'paid', 'failed', 'refunded'])],
         ], [
             'order_ids.required' => 'Please select at least one order.',

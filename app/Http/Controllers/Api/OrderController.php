@@ -280,7 +280,7 @@ class OrderController extends Controller
     public function updateStatus(Request $request, string $id): JsonResponse
     {
         $request->validate([
-            'status' => 'required|string|in:pending,confirmed,processing,shipped,delivered,cancelled',
+            'status' => 'required|string|in:pending,paid,shipped,completed,cancelled',
             'tracking_number' => 'nullable|string',
         ]);
 
