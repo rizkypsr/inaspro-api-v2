@@ -99,9 +99,9 @@ export default function OrderEdit({ order }: OrderEditProps) {
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
       case 'pending': return 'secondary';
-      case 'processing': return 'default';
+      case 'paid': return 'default';
       case 'shipped': return 'outline';
-      case 'delivered': return 'default';
+      case 'completed': return 'default';
       case 'cancelled': return 'destructive';
       default: return 'secondary';
     }
@@ -275,9 +275,9 @@ export default function OrderEdit({ order }: OrderEditProps) {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="pending">Pending</SelectItem>
-                        <SelectItem value="processing">Processing</SelectItem>
+                        <SelectItem value="paid">Paid</SelectItem>
                         <SelectItem value="shipped">Shipped</SelectItem>
-                        <SelectItem value="delivered">Delivered</SelectItem>
+                        <SelectItem value="completed">Completed</SelectItem>
                         <SelectItem value="cancelled">Cancelled</SelectItem>
                       </SelectContent>
                     </Select>

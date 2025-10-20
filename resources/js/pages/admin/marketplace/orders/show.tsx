@@ -44,11 +44,11 @@ export default function OrderShow({ order }: OrderShowProps) {
     switch (status) {
       case 'pending':
         return 'secondary';
-      case 'processing':
+      case 'paid':
         return 'default';
       case 'shipped':
         return 'outline';
-      case 'delivered':
+      case 'completed':
         return 'default';
       case 'cancelled':
         return 'destructive';

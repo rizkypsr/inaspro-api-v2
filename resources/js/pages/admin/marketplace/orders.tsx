@@ -148,17 +148,17 @@ export default function Orders({ orders, filters, stats }: OrdersProps) {
   const getStatusBadge = (status: string) => {
     const variants = {
       pending: 'secondary',
-      processing: 'default',
+      paid: 'default',
       shipped: 'outline',
-      delivered: 'default',
+      completed: 'default',
       cancelled: 'destructive',
     } as const;
 
     const colors = {
       pending: 'bg-yellow-100 text-yellow-800',
-      processing: 'bg-blue-100 text-blue-800',
+      paid: 'bg-blue-100 text-blue-800',
       shipped: 'bg-purple-100 text-purple-800',
-      delivered: 'bg-green-100 text-green-800',
+      completed: 'bg-green-100 text-green-800',
       cancelled: 'bg-red-100 text-red-800',
     } as const;
 
@@ -248,7 +248,7 @@ export default function Orders({ orders, filters, stats }: OrdersProps) {
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Delivered Orders</CardTitle>
+                <CardTitle className="text-sm font-medium">Completed Orders</CardTitle>
                 <CheckCircle className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
@@ -288,9 +288,9 @@ export default function Orders({ orders, filters, stats }: OrdersProps) {
                   <SelectContent>
                     <SelectItem value="all">All Status</SelectItem>
                     <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="processing">Processing</SelectItem>
+                    <SelectItem value="paid">Paid</SelectItem>
                     <SelectItem value="shipped">Shipped</SelectItem>
-                    <SelectItem value="delivered">Delivered</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
                     <SelectItem value="cancelled">Cancelled</SelectItem>
                   </SelectContent>
                 </Select>
@@ -361,14 +361,14 @@ export default function Orders({ orders, filters, stats }: OrdersProps) {
                     <DropdownMenuItem onClick={() => handleBulkUpdate('update_status', 'pending')}>
                       Set to Pending
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleBulkUpdate('update_status', 'processing')}>
-                      Set to Processing
+                    <DropdownMenuItem onClick={() => handleBulkUpdate('update_status', 'paid')}>
+                      Set to Paid
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => handleBulkUpdate('update_status', 'shipped')}>
                       Set to Shipped
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleBulkUpdate('update_status', 'delivered')}>
-                      Set to Delivered
+                    <DropdownMenuItem onClick={() => handleBulkUpdate('update_status', 'completed')}>
+                      Set to Completed
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => handleBulkUpdate('update_status', 'cancelled')}>
                       Set to Cancelled

@@ -3,7 +3,7 @@ export interface Order {
   uuid: string;
   user_id: string;
   cart_id: string;
-  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  status: 'pending' | 'paid' | 'shipped' | 'completed' | 'cancelled';
   payment_status: 'pending' | 'paid' | 'failed' | 'refunded';
   tracking_number?: string;
   payment_proof?: string;
@@ -114,7 +114,7 @@ export interface OrderFilters {
 }
 
 export interface OrderFormData {
-  status?: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  status?: 'pending' | 'paid' | 'shipped' | 'completed' | 'cancelled';
   payment_status?: 'pending' | 'paid' | 'failed' | 'refunded';
   tracking_number?: string;
   notes?: string;
@@ -131,7 +131,7 @@ export interface PaymentProofFormData {
 export interface BulkUpdateFormData {
   order_ids: string[];
   action: 'update_status' | 'update_payment_status';
-  status?: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  status?: 'pending' | 'paid' | 'shipped' | 'completed' | 'cancelled';
   payment_status?: 'pending' | 'paid' | 'failed' | 'refunded';
 }
 
