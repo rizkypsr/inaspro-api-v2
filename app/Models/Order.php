@@ -20,6 +20,7 @@ class Order extends Model
         'status',
         'payment_status',
         'payment_method',
+        'payment_proof',
         'xendit_invoice_id',
         'xendit_payment_id',
         'xendit_invoice_url',
@@ -45,7 +46,8 @@ class Order extends Model
 
         static::creating(function ($order) {
             if (empty($order->uuid)) {
-                $order->uuid = (string) Str::uuid();
+                $snowflake = app('Kra8\Snowflake\Snowflake');
+                $order->uuid = (string) $snowflake->next();
             }
         });
     }

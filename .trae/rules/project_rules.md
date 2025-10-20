@@ -8,3 +8,4 @@ Project Versions
 Rules
 - Always use inertia form helper to handle form submission (useForm)
 - handle error in form submission and display progress indicator
+- use shadcn for ui components (https://ui.shadcn.com/docs)

@@ -33,7 +33,7 @@ class CategoryController extends Controller
 
             // Pagination
             $perPage = $request->get('per_page', 15);
-            $categories = $query->orderBy('created_at', 'desc')->paginate($perPage);
+            $categories = $query->orderBy('created_at', 'desc')->get();
 
             return $this->successResponse(
                 'Categories retrieved successfully',

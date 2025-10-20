@@ -16,6 +16,11 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
+        // Seed roles first
+        $this->call([
+            RoleSeeder::class,
+        ]);
+
         User::firstOrCreate(
             ['email' => 'test@example.com'],
             [
@@ -24,6 +29,11 @@ class DatabaseSeeder extends Seeder
                 'email_verified_at' => now(),
             ]
         );
+
+        // Seed admin user with role
+        $this->call([
+            AdminUserSeeder::class,
+        ]);
 
         // Seed product catalog data
         $this->call([

@@ -51,9 +51,8 @@ class ShippingRateController extends Controller
             $sortOrder = $request->get('sort_order', 'desc');
             $query->orderBy($sortBy, $sortOrder);
 
-            // Pagination
-            $perPage = $request->get('per_page', 15);
-            $shippingRates = $query->paginate($perPage);
+            // Get all shipping rates
+            $shippingRates = $query->get();
 
             return $this->successResponse('Shipping rates retrieved successfully', $shippingRates);
         } catch (\Exception $e) {

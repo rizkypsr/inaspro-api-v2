@@ -35,9 +35,7 @@ class ProvinceController extends Controller
             $sortOrder = $request->get('sort_order', 'asc');
             $query->orderBy($sortBy, $sortOrder);
 
-            // Pagination
-            $perPage = $request->get('per_page', 15);
-            $provinces = $query->paginate($perPage);
+            $provinces = $query->get();
 
             return $this->successResponse('Provinces retrieved successfully', $provinces);
         } catch (\Exception $e) {

@@ -22,7 +22,6 @@ class StoreOrderRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'cart_id' => 'required|exists:carts,id',
             'payment_method' => 'required|string',
             'shipping_address' => 'required|string|max:500',
             'shipping_rate_id' => 'required|exists:shipping_rates,id',
@@ -42,8 +41,6 @@ class StoreOrderRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'cart_id.required' => 'Cart ID is required',
-            'cart_id.exists' => 'The selected cart does not exist',
             'payment_method.required' => 'Payment method is required',
             'payment_method.in' => 'Payment method must be one of: bank_transfer, credit_card, e_wallet, cash_on_delivery',
             'shipping_address.required' => 'Shipping address is required',
@@ -66,7 +63,6 @@ class StoreOrderRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'cart_id' => 'cart',
             'payment_method' => 'payment method',
             'shipping_address' => 'shipping address',
             'shipping_rate_id' => 'shipping rate',

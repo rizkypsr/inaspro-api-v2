@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Traits\ApiResponse;
 use App\Http\Resources\OrderResource;
+use App\Http\Resources\OrderSummaryResource;
 use App\Models\Order;
 use App\Models\Cart;
 use App\Models\GlobalVoucher;
@@ -33,19 +34,9 @@ class OrderController extends Controller
             $orders = Order::with(['orderItems.productVariant.product'])
                 ->where('user_id', $user->id)
                 ->orderBy('created_at', 'desc')
-                ->paginate($request->get('per_page', 15));
+                ->get();
 
-            return $this->successResponse('Orders retrieved successfully', [
-                'data' => OrderResource::collection($orders->items()),
-                'pagination' => [
-                    'current_page' => $orders->currentPage(),
-                    'last_page' => $orders->lastPage(),
-                    'per_page' => $orders->perPage(),
-                    'total' => $orders->total(),
-                    'from' => $orders->firstItem(),
-                    'to' => $orders->lastItem(),
-                ]
-            ]);
+            return $this->successResponse('Orders retrieved successfully', OrderResource::collection($orders));
         } catch (\Exception $e) {
             return $this->errorResponse('Failed to retrieve orders', $e->getMessage(), 500);
         }
@@ -60,15 +51,19 @@ class OrderController extends Controller
         
         try {
             $user = Auth::user();
-            $cart = Cart::with('cartItems.productVariant.product')->findOrFail($request->cart_id);
             
-            // Verify cart belongs to user
-            if ($cart->user_id !== $user->id) {
-                throw ValidationException::withMessages(['cart_id' => 'Cart does not belong to authenticated user']);
+            // Find the user's active cart
+            $cart = Cart::with('cartItems.productVariant.product')
+                ->where('user_id', $user->id)
+                ->where('status', 'active')
+                ->first();
+            
+            if (!$cart) {
+                throw ValidationException::withMessages(['cart' => 'No active cart found for user']);
             }
 
             if ($cart->cartItems->isEmpty()) {
-                throw ValidationException::withMessages(['cart_id' => 'Cart is empty']);
+                throw ValidationException::withMessages(['cart' => 'Cart is empty']);
             }
 
             // Get shipping rate
@@ -348,6 +343,192 @@ class OrderController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->errorResponse('Failed to update payment status', $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Upload payment proof for an order.
+     */
+    public function uploadPaymentProof(Request $request, string $id): JsonResponse
+    {
+        $request->validate([
+            'payment_proof' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048', // 2MB max
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            $user = Auth::user();
+            $order = Order::findOrFail($id);
+
+            // Verify order belongs to user
+            if ($order->user_id !== $user->id) {
+                return $this->errorResponse('Unauthorized', 'Order does not belong to authenticated user', 403);
+            }
+
+            // Check if order is in a valid state for payment proof upload
+            if (!in_array($order->status, ['pending', 'confirmed'])) {
+                return $this->errorResponse('Invalid order status', 'Payment proof can only be uploaded for pending or confirmed orders', 400);
+            }
+
+            // Store the uploaded file
+            $file = $request->file('payment_proof');
+            $filename = time() . '_' . $order->uuid . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('payment-proofs', $filename, 'public');
+
+            // Update order with payment proof path
+            $order->update([
+                'payment_proof' => $path,
+                'payment_status' => 'pending' // Set to pending for admin review
+            ]);
+
+            DB::commit();
+
+            return $this->successResponse('Payment proof uploaded successfully', [
+                'order_id' => $order->id,
+                'payment_proof' => $path,
+                'message' => 'Payment proof has been uploaded and is pending admin review'
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return $this->errorResponse('Failed to upload payment proof', $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Get order summary before payment.
+     */
+    public function summary(Request $request): JsonResponse
+    {
+        $request->validate([
+            'shipping_rate_id' => 'required|exists:shipping_rates,id',
+            'global_voucher_codes' => 'nullable|array',
+            'global_voucher_codes.*' => 'string|exists:global_vouchers,code',
+            'product_voucher_codes' => 'nullable|array',
+            'product_voucher_codes.*' => 'string|exists:product_vouchers,code',
+        ]);
+
+        try {
+            $user = Auth::user();
+            
+            // Find the user's active cart
+            $cart = Cart::with('cartItems.productVariant.product')
+                ->where('user_id', $user->id)
+                ->where('status', 'active')
+                ->first();
+            
+            if (!$cart) {
+                return $this->errorResponse('No active cart found', 'Please add items to cart first', 404);
+            }
+
+            if ($cart->cartItems->isEmpty()) {
+                return $this->errorResponse('Cart is empty', 'Please add items to cart first', 400);
+            }
+
+            // Get shipping rate
+            $shippingRate = ShippingRate::findOrFail($request->shipping_rate_id);
+
+            // Calculate subtotal
+            $subtotal = $cart->cartItems->sum(function ($item) {
+                return $item->quantity * $item->productVariant->price;
+            });
+
+            // Apply global vouchers
+            $globalVoucherDiscount = 0;
+            $appliedGlobalVouchers = [];
+            if ($request->has('global_voucher_codes')) {
+                foreach ($request->global_voucher_codes as $code) {
+                    $voucher = GlobalVoucher::where('code', $code)
+                        ->where('status', 'active')
+                        ->where('start_date', '<=', now())
+                        ->where('end_date', '>=', now())
+                        ->first();
+                    
+                    if ($voucher && $subtotal >= $voucher->min_order_amount) {
+                        $discount = $voucher->discount_amount ?: ($subtotal * $voucher->discount_percent / 100);
+                        if ($voucher->max_discount_amount) {
+                            $discount = min($discount, $voucher->max_discount_amount);
+                        }
+                        $globalVoucherDiscount += $discount;
+                        $appliedGlobalVouchers[] = [
+                            'code' => $voucher->code,
+                            'name' => $voucher->name,
+                            'discount_amount' => $discount,
+                            'discount_percent' => $voucher->discount_percent,
+                        ];
+                    }
+                }
+            }
+
+            // Apply product vouchers
+            $productVoucherDiscount = 0;
+            $appliedProductVouchers = [];
+            if ($request->has('product_voucher_codes')) {
+                foreach ($request->product_voucher_codes as $code) {
+                    $voucher = ProductVoucher::where('code', $code)
+                        ->where('status', 'active')
+                        ->where('start_date', '<=', now())
+                        ->where('end_date', '>=', now())
+                        ->first();
+                    
+                    if ($voucher) {
+                        // Check if cart contains the product
+                        $cartItem = $cart->cartItems->first(function ($item) use ($voucher) {
+                            return $item->productVariant->product_id === $voucher->product_id;
+                        });
+                        
+                        if ($cartItem) {
+                            $itemTotal = $cartItem->quantity * $cartItem->productVariant->price;
+                            $discount = $voucher->discount_amount ?: ($itemTotal * $voucher->discount_percent / 100);
+                            $productVoucherDiscount += $discount;
+                            $appliedProductVouchers[] = [
+                                'code' => $voucher->code,
+                                'name' => $voucher->name,
+                                'product_name' => $cartItem->productVariant->product->name,
+                                'discount_amount' => $discount,
+                                'discount_percent' => $voucher->discount_percent,
+                            ];
+                        }
+                    }
+                }
+            }
+
+            $totalDiscount = $globalVoucherDiscount + $productVoucherDiscount;
+            $finalAmount = $subtotal - $totalDiscount + $shippingRate->rate;
+
+            // Prepare cart items for response
+            $cartItems = $cart->cartItems->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'product_variant_id' => $item->product_variant_id,
+                    'product_name' => $item->productVariant->product->name,
+                    'variant_name' => $item->productVariant->name,
+                    'price' => $item->productVariant->price,
+                    'quantity' => $item->quantity,
+                    'total' => $item->quantity * $item->productVariant->price,
+                ];
+            });
+
+            // Prepare data for OrderSummaryResource
+            $summaryData = [
+                'items' => $cartItems,
+                'subtotal' => $subtotal,
+                'shipping' => [
+                    'name' => $shippingRate->name,
+                    'cost' => $shippingRate->rate,
+                ],
+                'vouchers' => [
+                    'global_vouchers' => $appliedGlobalVouchers,
+                    'product_vouchers' => $appliedProductVouchers,
+                ],
+                'total_amount' => $finalAmount,
+            ];
+
+            return $this->successResponse('Order summary calculated successfully', new OrderSummaryResource($summaryData));
+
+        } catch (\Exception $e) {
+            return $this->errorResponse('Failed to calculate order summary', $e->getMessage(), 500);
         }
     }
 }

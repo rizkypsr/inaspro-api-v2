@@ -32,6 +32,13 @@ class AuthenticatedSessionController extends Controller
     {
         $user = $request->validateCredentials();
 
+        // Check if user has Admin role
+        if (!$user->hasRole('Admin')) {
+            return back()->withErrors([
+                'email' => 'Only administrators can access this system.',
+            ])->onlyInput('email');
+        }
+
         if (Features::enabled(Features::twoFactorAuthentication()) && $user->hasEnabledTwoFactorAuthentication()) {
             $request->session()->put([
                 'login.id' => $user->getKey(),

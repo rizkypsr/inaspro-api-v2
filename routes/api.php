@@ -49,8 +49,10 @@ Route::middleware('auth:sanctum')->group(function () {
     
     // Order routes
     Route::apiResource('orders', OrderController::class);
+    Route::post('orders/summary', [OrderController::class, 'summary'])->name('orders.summary');
     Route::put('orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.update-status');
     Route::put('orders/{order}/payment-status', [OrderController::class, 'updatePaymentStatus'])->name('orders.update-payment-status');
+    Route::post('orders/{order}/payment-proof', [OrderController::class, 'uploadPaymentProof'])->name('orders.upload-payment-proof');
     
     // Global Voucher routes
     Route::apiResource('global-vouchers', GlobalVoucherController::class);

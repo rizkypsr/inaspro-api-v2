@@ -13,7 +13,7 @@ import {
 import { dashboard } from '@/routes';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid } from 'lucide-react';
+import { BookOpen, Folder, LayoutGrid, Package, ShoppingCart, Tag, Truck, FileText } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -22,18 +22,32 @@ const mainNavItems: NavItem[] = [
         href: dashboard(),
         icon: LayoutGrid,
     },
-];
-
-const footerNavItems: NavItem[] = [
     {
-        title: 'Repository',
-        href: 'https://github.com/laravel/react-starter-kit',
-        icon: Folder,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#react',
-        icon: BookOpen,
+        title: 'Marketplace',
+        href: '/admin/marketplace',
+        icon: ShoppingCart,
+        items: [
+            {
+                title: 'Categories',
+                href: '/admin/marketplace/categories',
+                icon: Tag,
+            },
+            {
+                title: 'Products',
+                href: '/admin/marketplace/products',
+                icon: Package,
+            },
+            {
+                title: 'Logistics',
+                href: '/admin/marketplace/logistics',
+                icon: Truck,
+            },
+            {
+                title: 'Orders',
+                href: '/admin/marketplace/orders',
+                icon: FileText,
+            },
+        ],
     },
 ];
 
@@ -57,7 +71,6 @@ export function AppSidebar() {
             </SidebarContent>
 
             <SidebarFooter>
-                <NavFooter items={footerNavItems} className="mt-auto" />
                 <NavUser />
             </SidebarFooter>
         </Sidebar>
