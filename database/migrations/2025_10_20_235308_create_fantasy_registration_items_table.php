@@ -28,9 +28,9 @@ return new class extends Migration
             $table->index('fantasy_tshirt_option_id');
             $table->index('fantasy_shoe_size_id');
             // optional: ensure a registration doesn't have duplicate tshirt entries
-            $table->unique(['fantasy_registration_id', 'fantasy_tshirt_option_id']);
+            $table->unique(['fantasy_registration_id', 'fantasy_tshirt_option_id'], 'reg_tshirt_unique');
             // optional: ensure a registration doesn't have duplicate shoe entries (by shoe_size)
-            $table->unique(['fantasy_registration_id', 'fantasy_shoe_size_id']);
+            $table->unique(['fantasy_registration_id', 'fantasy_shoe_size_id'], 'reg_shoe_unique');
         });
     }
 
