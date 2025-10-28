@@ -13,10 +13,11 @@ return new class extends Migration
     {
         Schema::create('fantasy_tshirt_options', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('fantasy_event_team_id')->constrained('fantasy_event_teams')->cascadeOnDelete()->index();
+            $table->foreignId('fantasy_event_team_id')->constrained('fantasy_event_teams')->cascadeOnDelete();
             $table->string('size', 10);
             $table->timestamps();
 
+            $table->index('fantasy_event_team_id');
             $table->unique(['fantasy_event_team_id', 'size']);
         });
     }
