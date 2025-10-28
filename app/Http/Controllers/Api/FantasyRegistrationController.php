@@ -375,8 +375,8 @@ class FantasyRegistrationController extends Controller
             ->with([
                 'fantasyEvent:id,title,location',
                 'fantasyEventTeam:id,name',
-                'registrationItems.fantasyTshirtOption:id,size,color',
-                'registrationItems.fantasyShoeSize.fantasyShoe:id,brand,model,price',
+                'registrationItems.fantasyTshirtOption:id,size',
+                'registrationItems.fantasyShoeSize.fantasyShoe:id,name,price',
                 'registrationItems.fantasyShoeSize:id,fantasy_shoe_id,size',
             ])
             ->first();
