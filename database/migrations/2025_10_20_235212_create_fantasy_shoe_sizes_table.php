@@ -13,12 +13,13 @@ return new class extends Migration
     {
         Schema::create('fantasy_shoe_sizes', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('fantasy_shoe_id')->constrained('fantasy_shoes')->cascadeOnDelete()->index();
+            $table->foreignId('fantasy_shoe_id')->constrained('fantasy_shoes')->cascadeOnDelete();
             $table->string('size', 10);
             $table->unsignedInteger('stock');
             $table->unsignedInteger('reserved_stock')->default(0);
             $table->timestamps();
 
+            $table->index('fantasy_shoe_id');
             $table->unique(['fantasy_shoe_id', 'size']);
             $table->index(['fantasy_shoe_id', 'stock', 'reserved_stock']);
         });

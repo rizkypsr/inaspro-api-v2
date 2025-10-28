@@ -14,13 +14,16 @@ return new class extends Migration
         Schema::create('fantasy_registrations', function (Blueprint $table) {
             $table->id();
             $table->string('registration_code', 30)->unique()->index();
-            $table->foreignId('fantasy_event_id')->constrained('fantasy_events')->cascadeOnDelete()->index();
-            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete()->index();
-            $table->foreignId('fantasy_event_team_id')->constrained('fantasy_event_teams')->cascadeOnDelete()->index();
+            $table->foreignId('fantasy_event_id')->constrained('fantasy_events')->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('fantasy_event_team_id')->constrained('fantasy_event_teams')->cascadeOnDelete();
             $table->decimal('registration_fee', 12, 2)->comment('snapshot of event base_fee at registration time');
             $table->enum('status', ['pending','confirmed','cancelled'])->default('pending')->index();
             $table->timestamps();
 
+            $table->index('fantasy_event_id');
+            $table->index('user_id');
+            $table->index('fantasy_event_team_id');
             // ensure a user can't register same event twice
             $table->unique(['fantasy_event_id', 'user_id']);
         });

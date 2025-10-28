@@ -13,12 +13,13 @@ return new class extends Migration
     {
         Schema::create('fantasy_shoes', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('fantasy_event_id')->constrained('fantasy_events')->cascadeOnDelete()->index();
+            $table->foreignId('fantasy_event_id')->constrained('fantasy_events')->cascadeOnDelete();
             $table->string('name', 100);
             $table->string('image', 255);
             $table->unsignedInteger('price')->comment('price applied for this shoe (in smallest currency unit)'); 
             $table->timestamps();
 
+            $table->index('fantasy_event_id');
             $table->index(['fantasy_event_id', 'price']);
         });
     }
