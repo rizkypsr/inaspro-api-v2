@@ -16,6 +16,11 @@ use App\Http\Controllers\Api\ProductVoucherController;
 use App\Http\Controllers\Api\ProvinceController;
 use App\Http\Controllers\Api\ShippingRateController;
 use App\Http\Controllers\Api\CommunityController;
+use App\Http\Controllers\Api\FantasyEventController;
+use App\Http\Controllers\Api\FantasyTeamController;
+use App\Http\Controllers\Api\FantasyRegistrationController;
+use App\Http\Controllers\Api\FantasyPaymentController;
+use App\Http\Controllers\Api\FantasyShoeController;
 
 // Public routes (no authentication required)
 Route::prefix('auth')->group(function () {
@@ -83,4 +88,41 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('posts', [CommunityController::class, 'createPost'])->name('communities.posts.store');
         Route::get('posts', [CommunityController::class, 'posts'])->name('communities.posts.index');
     });
+    
+    // Fantasy Event routes
+    Route::apiResource('fantasy-events', FantasyEventController::class);
+    Route::get('fantasy-events/{fantasyEvent}/teams', [FantasyEventController::class, 'teams'])->name('fantasy-events.teams');
+    Route::get('fantasy-events/{fantasyEvent}/shoes', [FantasyEventController::class, 'shoes'])->name('fantasy-events.shoes');
+    
+    // Fantasy Team routes
+    Route::prefix('fantasy-events/{fantasyEvent}')->group(function () {
+        Route::get('teams', [FantasyTeamController::class, 'index'])->name('fantasy-events.teams.index');
+        Route::get('teams/{fantasyEventTeam}', [FantasyTeamController::class, 'show'])->name('fantasy-events.teams.show');
+        Route::get('teams-availability', [FantasyTeamController::class, 'availability'])->name('fantasy-events.teams.availability');
+        Route::get('teams/{fantasyEventTeam}/members', [FantasyTeamController::class, 'members'])->name('fantasy-events.teams.members');
+        Route::get('teams/{fantasyEventTeam}/tshirt-options', [FantasyTeamController::class, 'tshirtOptions'])->name('fantasy-events.teams.tshirt-options');
+        
+        // Fantasy Shoe routes
+        Route::get('shoes', [FantasyShoeController::class, 'index'])->name('fantasy-events.shoes.index');
+        Route::get('shoes/{fantasyShoe}', [FantasyShoeController::class, 'show'])->name('fantasy-events.shoes.show');
+        Route::get('shoes/{fantasyShoe}/sizes', [FantasyShoeController::class, 'sizes'])->name('fantasy-events.shoes.sizes');
+        Route::get('shoes-availability', [FantasyShoeController::class, 'availability'])->name('fantasy-events.shoes.availability');
+        Route::post('shoes/check-availability', [FantasyShoeController::class, 'checkAvailability'])->name('fantasy-events.shoes.check-availability');
+        Route::get('shoes/popular-sizes', [FantasyShoeController::class, 'popularSizes'])->name('fantasy-events.shoes.popular-sizes');
+    });
+    
+    // Fantasy Registration routes
+    Route::apiResource('fantasy-registrations', FantasyRegistrationController::class)->except(['update']);
+    Route::put('fantasy-registrations/{fantasyRegistration}/cancel', [FantasyRegistrationController::class, 'cancel'])->name('fantasy-registrations.cancel');
+    Route::get('fantasy-events/{fantasyEvent}/registration-summary', [FantasyRegistrationController::class, 'summary'])->name('fantasy-events.registration-summary');
+    
+    // User specific fantasy registration routes
+    Route::get('user/fantasy-registrations/history', [FantasyRegistrationController::class, 'userHistory'])->name('user.fantasy-registrations.history');
+    Route::get('user/fantasy-registrations/{id}/detail', [FantasyRegistrationController::class, 'userRegistrationDetail'])->name('user.fantasy-registrations.detail');
+    
+    // Fantasy Payment routes
+    Route::apiResource('fantasy-payments', FantasyPaymentController::class)->except(['update', 'destroy']);
+    Route::put('fantasy-payments/{fantasyPayment}/proof', [FantasyPaymentController::class, 'updateProof'])->name('fantasy-payments.update-proof');
+    Route::get('fantasy-payments/methods', [FantasyPaymentController::class, 'paymentMethods'])->name('fantasy-payments.methods');
+    Route::get('fantasy-payments/statistics', [FantasyPaymentController::class, 'statistics'])->name('fantasy-payments.statistics');
 });

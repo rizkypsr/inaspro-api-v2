@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\FantasyController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\LogisticsController;
 use App\Http\Controllers\OrderController;
@@ -68,6 +69,16 @@ Route::middleware(['auth', 'verified', 'role:Admin'])->prefix('admin')->name('ad
         Route::delete('/orders/{order}/payment-proof', [OrderController::class, 'removePaymentProof'])->name('orders.remove-payment-proof');
         Route::put('/orders/bulk-update', [OrderController::class, 'bulkUpdate'])->name('orders.bulk-update');
     });
+    
+    // Fantasy routes
+    Route::get('/fantasy', [FantasyController::class, 'index'])->name('fantasy.index');
+    Route::get('/fantasy/create', [FantasyController::class, 'create'])->name('fantasy.create');
+    Route::post('/fantasy', [FantasyController::class, 'store'])->name('fantasy.store');
+    Route::get('/fantasy/{fantasyEvent}', [FantasyController::class, 'show'])->name('fantasy.show');
+    Route::put('/fantasy/{fantasyEvent}/status', [FantasyController::class, 'updateStatus'])->name('fantasy.updateStatus');
+    Route::put('/fantasy/tshirts/{tshirtOption}', [FantasyController::class, 'updateTshirt'])->name('fantasy.update-tshirt');
+    Route::put('/fantasy/teams/{team}', [FantasyController::class, 'updateTeam'])->name('fantasy.teams.update');
+    Route::put('/fantasy/payments/{payment}', [FantasyController::class, 'updatePaymentStatus'])->name('fantasy.payments.update');
     
     Route::get('/users', function () {
         return Inertia::render('admin/users');
