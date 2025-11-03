@@ -42,7 +42,7 @@ import {
 
 interface FantasyEvent {
   id: number;
-  name: string;
+  title: string;
   description: string;
   location: string;
   play_date: string;
@@ -298,7 +298,7 @@ export default function FantasyIndex({ fantasyEvents, filters }: FantasyPageProp
                       <TableRow key={event.id}>
                         <TableCell className="font-medium">
                           <div>
-                            <div className="font-semibold">{event.name}</div>
+                            <div className="font-semibold">{event.title}</div>
                             {event.description && (
                               <div className="text-sm text-muted-foreground truncate max-w-xs">
                                 {event.description}
