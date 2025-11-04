@@ -125,4 +125,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('fantasy-payments/{fantasyPayment}/proof', [FantasyPaymentController::class, 'updateProof'])->name('fantasy-payments.update-proof');
     Route::get('fantasy-payments/methods', [FantasyPaymentController::class, 'paymentMethods'])->name('fantasy-payments.methods');
     Route::get('fantasy-payments/statistics', [FantasyPaymentController::class, 'statistics'])->name('fantasy-payments.statistics');
+    
+    // TV Category routes (GET only)
+    Route::get('tv-categories', [App\Http\Controllers\Api\TvCategoryController::class, 'index'])->name('tv-categories.index');
+    // Route::get('tv-categories/active', [App\Http\Controllers\Api\TvCategoryController::class, 'active'])->name('tv-categories.active');
+    // Route::get('tv-categories/{tvCategory}', [App\Http\Controllers\Api\TvCategoryController::class, 'show'])->name('tv-categories.show');
+    
+    // TV routes (GET only)
+    Route::get('tvs', [App\Http\Controllers\Api\TvController::class, 'index'])->name('tvs.index');
+    // Route::get('tvs/categories', [App\Http\Controllers\Api\TvController::class, 'categories'])->name('tvs.categories');
+    // Route::get('tvs/{tv}', [App\Http\Controllers\Api\TvController::class, 'show'])->name('tvs.show');
+    // Route::get('tvs/category/{category}', [App\Http\Controllers\Api\TvController::class, 'byCategory'])->name('tvs.by-category');
 });

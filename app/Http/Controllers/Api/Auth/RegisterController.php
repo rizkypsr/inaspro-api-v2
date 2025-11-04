@@ -24,6 +24,7 @@ class RegisterController extends Controller
             $user = User::create([
                 'name' => $validated['name'],
                 'email' => $validated['email'],
+                'phone' => $validated['phone'],
                 'password' => Hash::make($validated['password']),
             ]);
 
@@ -37,6 +38,7 @@ class RegisterController extends Controller
                         'id' => $user->id,
                         'name' => $user->name,
                         'email' => $user->email,
+                        'phone' => $user->phone,
                         'email_verified_at' => $user->email_verified_at,
                         'created_at' => $user->created_at,
                         'updated_at' => $user->updated_at,

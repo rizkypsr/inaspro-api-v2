@@ -7,6 +7,8 @@ use App\Http\Controllers\FantasyController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\LogisticsController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\TvCategoryController;
+use App\Http\Controllers\TvController;
 
 Route::get('/', function () {
     return redirect()->route('dashboard');
@@ -87,6 +89,27 @@ Route::middleware(['auth', 'verified', 'role:Admin'])->prefix('admin')->name('ad
     Route::get('/analytics', function () {
         return Inertia::render('admin/analytics');
     })->name('analytics');
+    
+    // TV Management routes
+    Route::prefix('tv')->name('tv.')->group(function () {
+        // TV Categories routes
+        Route::get('/categories', [TvCategoryController::class, 'index'])->name('categories.index');
+        Route::get('/categories/create', [TvCategoryController::class, 'create'])->name('categories.create');
+        Route::post('/categories', [TvCategoryController::class, 'store'])->name('categories.store');
+        Route::get('/categories/{tvCategory}', [TvCategoryController::class, 'show'])->name('categories.show');
+        Route::get('/categories/{tvCategory}/edit', [TvCategoryController::class, 'edit'])->name('categories.edit');
+        Route::put('/categories/{tvCategory}', [TvCategoryController::class, 'update'])->name('categories.update');
+        Route::delete('/categories/{tvCategory}', [TvCategoryController::class, 'destroy'])->name('categories.destroy');
+        
+        // TVs routes
+        Route::get('/', [TvController::class, 'index'])->name('index');
+        Route::get('/create', [TvController::class, 'create'])->name('create');
+        Route::post('/', [TvController::class, 'store'])->name('store');
+        Route::get('/{tv}', [TvController::class, 'show'])->name('show');
+        Route::get('/{tv}/edit', [TvController::class, 'edit'])->name('edit');
+        Route::put('/{tv}', [TvController::class, 'update'])->name('update');
+        Route::delete('/{tv}', [TvController::class, 'destroy'])->name('destroy');
+    });
     
     Route::get('/settings', function () {
         return Inertia::render('admin/settings');

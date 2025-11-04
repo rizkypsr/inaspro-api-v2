@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
             ['email' => 'test@example.com'],
             [
                 'name' => 'Test User',
+                'phone' => '081111111111',
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
             ]

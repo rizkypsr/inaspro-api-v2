@@ -19,6 +19,7 @@ class AdminUserSeeder extends Seeder
             ['email' => 'admin@inaspro.com'],
             [
                 'name' => 'Admin',
+                'phone' => '081234567890',
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
             ]

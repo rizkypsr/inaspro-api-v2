@@ -13,7 +13,7 @@ import {
 import { dashboard } from '@/routes';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, Package, ShoppingCart, Tag, Truck, FileText, Trophy } from 'lucide-react';
+import { BookOpen, Folder, LayoutGrid, Package, ShoppingCart, Tag, Truck, FileText, Trophy, Tv, List } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -26,6 +26,23 @@ const mainNavItems: NavItem[] = [
         title: 'Fantasy',
         href: '/admin/fantasy',
         icon: Trophy,
+    },
+    {
+        title: 'TV',
+        href: '/admin/tv',
+        icon: Tv,
+        items: [
+            {
+                title: 'List TV',
+                href: '/admin/tv',
+                icon: List,
+            },
+            {
+                title: 'Kategori TV',
+                href: '/admin/tv/categories',
+                icon: Tag,
+            },
+        ],
     },
     {
         title: 'Marketplace',

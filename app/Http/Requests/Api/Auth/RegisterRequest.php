@@ -27,6 +27,7 @@ class RegisterRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'phone' => ['required', 'string', 'max:20'],
             'password' => ['required', 'confirmed', Password::defaults()],
         ];
     }
@@ -42,6 +43,8 @@ class RegisterRequest extends FormRequest
             'email.required' => 'Email address is required.',
             'email.email' => 'Please provide a valid email address.',
             'email.unique' => 'This email address is already registered.',
+            'phone.required' => 'Phone number is required.',
+            'phone.max' => 'Phone number must not exceed 20 characters.',
             'password.required' => 'Password is required.',
             'password.confirmed' => 'Password confirmation does not match.',
         ];

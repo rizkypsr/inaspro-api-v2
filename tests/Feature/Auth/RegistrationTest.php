@@ -2,20 +2,20 @@
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
-test('registration screen can be rendered', function () {
-    $response = $this->get(route('register'));
+test('registration screen is disabled', function () {
+    $response = $this->get('/register');
 
-    $response->assertStatus(200);
-});
+    $response->assertStatus(404);
+})->skip('Web registration disabled; API-only registration supported.');
 
-test('new users can register', function () {
-    $response = $this->post(route('register.store'), [
+test('new users cannot register via web', function () {
+    $response = $this->post('/register', [
         'name' => 'Test User',
         'email' => 'test@example.com',
+        'phone' => '081234567890',
         'password' => 'password',
         'password_confirmation' => 'password',
     ]);
 
-    $this->assertAuthenticated();
-    $response->assertRedirect(route('dashboard', absolute: false));
-});
+    $response->assertStatus(404);
+})->skip('Web registration disabled; API-only registration supported.');
