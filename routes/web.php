@@ -14,6 +14,15 @@ Route::get('/', function () {
     return redirect()->route('dashboard');
 })->name('home');
 
+// Public pages
+Route::get('/privacy-policy', function () {
+    return Inertia::render('legal/privacy-policy');
+})->name('privacy-policy');
+
+Route::get('/privacy-policy/en', function () {
+    return Inertia::render('legal/privacy-policy-en');
+})->name('privacy-policy.en');
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');
