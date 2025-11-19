@@ -30,6 +30,47 @@ Route::prefix('auth')->group(function () {
     Route::post('reset-password', [ResetPasswordController::class, 'reset'])->name('api.auth.reset-password');
 });
 
+// Public data routes (no authentication required)
+Route::apiResource('categories', CategoryController::class)->only(['index', 'show']);
+Route::apiResource('products', ProductController::class)->only(['index', 'show']);
+Route::apiResource('product-variants', ProductVariantController::class)->only(['index', 'show']);
+Route::apiResource('provinces', ProvinceController::class)->only(['index', 'show']);
+Route::apiResource('shipping-rates', ShippingRateController::class)->only(['index', 'show']);
+Route::apiResource('communities', CommunityController::class)->only(['index', 'show']);
+
+// Fantasy public data routes
+Route::apiResource('fantasy-events', FantasyEventController::class)->only(['index', 'show']);
+Route::get('fantasy-events/{fantasyEvent}/teams', [FantasyEventController::class, 'teams'])->name('fantasy-events.teams');
+Route::get('fantasy-events/{fantasyEvent}/shoes', [FantasyEventController::class, 'shoes'])->name('fantasy-events.shoes');
+
+// Fantasy Team & Shoe routes (public GET)
+Route::prefix('fantasy-events/{fantasyEvent}')->group(function () {
+    Route::get('teams', [FantasyTeamController::class, 'index'])->name('fantasy-events.teams.index');
+    Route::get('teams/{fantasyEventTeam}', [FantasyTeamController::class, 'show'])->name('fantasy-events.teams.show');
+    Route::get('teams-availability', [FantasyTeamController::class, 'availability'])->name('fantasy-events.teams.availability');
+    Route::get('teams/{fantasyEventTeam}/members', [FantasyTeamController::class, 'members'])->name('fantasy-events.teams.members');
+    Route::get('teams/{fantasyEventTeam}/tshirt-options', [FantasyTeamController::class, 'tshirtOptions'])->name('fantasy-events.teams.tshirt-options');
+
+    // Fantasy Shoe routes
+    Route::get('shoes', [FantasyShoeController::class, 'index'])->name('fantasy-events.shoes.index');
+    Route::get('shoes/{fantasyShoe}', [FantasyShoeController::class, 'show'])->name('fantasy-events.shoes.show');
+    Route::get('shoes/{fantasyShoe}/sizes', [FantasyShoeController::class, 'sizes'])->name('fantasy-events.shoes.sizes');
+    Route::get('shoes-availability', [FantasyShoeController::class, 'availability'])->name('fantasy-events.shoes.availability');
+    Route::post('shoes/check-availability', [FantasyShoeController::class, 'checkAvailability'])->name('fantasy-events.shoes.check-availability');
+    Route::get('shoes/popular-sizes', [FantasyShoeController::class, 'popularSizes'])->name('fantasy-events.shoes.popular-sizes');
+});
+
+// TV Category routes (public GET only)
+Route::get('tv-categories', [App\Http\Controllers\Api\TvCategoryController::class, 'index'])->name('tv-categories.index');
+// Route::get('tv-categories/active', [App\Http\Controllers\Api\TvCategoryController::class, 'active'])->name('tv-categories.active');
+// Route::get('tv-categories/{tvCategory}', [App\Http\Controllers\Api\TvCategoryController::class, 'show'])->name('tv-categories.show');
+
+// TV routes (public GET only)
+Route::get('tvs', [App\Http\Controllers\Api\TvController::class, 'index'])->name('tvs.index');
+// Route::get('tvs/categories', [App\Http\Controllers\Api\TvController::class, 'categories'])->name('tvs.categories');
+// Route::get('tvs/{tv}', [App\Http\Controllers\Api\TvController::class, 'show'])->name('tvs.show');
+// Route::get('tvs/category/{category}', [App\Http\Controllers\Api\TvController::class, 'byCategory'])->name('tvs.by-category');
+
 // Protected routes (authentication required)
 Route::middleware('auth:sanctum')->prefix('auth')->group(function () {
     Route::post('logout', [LoginController::class, 'logout'])->name('api.auth.logout');
@@ -37,9 +78,9 @@ Route::middleware('auth:sanctum')->prefix('auth')->group(function () {
 });
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::apiResource('categories', CategoryController::class);
-    Route::apiResource('products', ProductController::class);
-    Route::apiResource('product-variants', ProductVariantController::class);
+    Route::apiResource('categories', CategoryController::class)->except(['index', 'show']);
+    Route::apiResource('products', ProductController::class)->except(['index', 'show']);
+    Route::apiResource('product-variants', ProductVariantController::class)->except(['index', 'show']);
     Route::apiResource('product-stock-logs', ProductStockLogController::class);
     
     // Cart routes
@@ -70,14 +111,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('product-vouchers/{productVoucher}/usage', [ProductVoucherController::class, 'usage'])->name('product-vouchers.usage');
     Route::get('products/{product}/vouchers', [ProductVoucherController::class, 'byProduct'])->name('products.vouchers');
     
-    // Province routes
-    Route::apiResource('provinces', ProvinceController::class);
+    // Province routes (mutations only)
+    Route::apiResource('provinces', ProvinceController::class)->except(['index', 'show']);
     
-    // Shipping Rate routes
-    Route::apiResource('shipping-rates', ShippingRateController::class);
+    // Shipping Rate routes (mutations only)
+    Route::apiResource('shipping-rates', ShippingRateController::class)->except(['index', 'show']);
     
-    // Community routes
-    Route::apiResource('communities', CommunityController::class);
+    // Community routes (mutations only)
+    Route::apiResource('communities', CommunityController::class)->except(['index', 'show']);
     
     // Community-specific routes
     Route::prefix('communities/{community}')->group(function () {
@@ -89,27 +130,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('posts', [CommunityController::class, 'posts'])->name('communities.posts.index');
     });
     
-    // Fantasy Event routes
-    Route::apiResource('fantasy-events', FantasyEventController::class);
-    Route::get('fantasy-events/{fantasyEvent}/teams', [FantasyEventController::class, 'teams'])->name('fantasy-events.teams');
-    Route::get('fantasy-events/{fantasyEvent}/shoes', [FantasyEventController::class, 'shoes'])->name('fantasy-events.shoes');
+    // Fantasy Event routes (mutations only)
+    Route::apiResource('fantasy-events', FantasyEventController::class)->except(['index', 'show']);
     
-    // Fantasy Team routes
-    Route::prefix('fantasy-events/{fantasyEvent}')->group(function () {
-        Route::get('teams', [FantasyTeamController::class, 'index'])->name('fantasy-events.teams.index');
-        Route::get('teams/{fantasyEventTeam}', [FantasyTeamController::class, 'show'])->name('fantasy-events.teams.show');
-        Route::get('teams-availability', [FantasyTeamController::class, 'availability'])->name('fantasy-events.teams.availability');
-        Route::get('teams/{fantasyEventTeam}/members', [FantasyTeamController::class, 'members'])->name('fantasy-events.teams.members');
-        Route::get('teams/{fantasyEventTeam}/tshirt-options', [FantasyTeamController::class, 'tshirtOptions'])->name('fantasy-events.teams.tshirt-options');
-        
-        // Fantasy Shoe routes
-        Route::get('shoes', [FantasyShoeController::class, 'index'])->name('fantasy-events.shoes.index');
-        Route::get('shoes/{fantasyShoe}', [FantasyShoeController::class, 'show'])->name('fantasy-events.shoes.show');
-        Route::get('shoes/{fantasyShoe}/sizes', [FantasyShoeController::class, 'sizes'])->name('fantasy-events.shoes.sizes');
-        Route::get('shoes-availability', [FantasyShoeController::class, 'availability'])->name('fantasy-events.shoes.availability');
-        Route::post('shoes/check-availability', [FantasyShoeController::class, 'checkAvailability'])->name('fantasy-events.shoes.check-availability');
-        Route::get('shoes/popular-sizes', [FantasyShoeController::class, 'popularSizes'])->name('fantasy-events.shoes.popular-sizes');
-    });
+    // (Fantasy Team & Shoe GET endpoints moved to public section above)
     
     // Fantasy Registration routes
     Route::apiResource('fantasy-registrations', FantasyRegistrationController::class)->except(['update']);
@@ -126,14 +150,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('fantasy-payments/methods', [FantasyPaymentController::class, 'paymentMethods'])->name('fantasy-payments.methods');
     Route::get('fantasy-payments/statistics', [FantasyPaymentController::class, 'statistics'])->name('fantasy-payments.statistics');
     
-    // TV Category routes (GET only)
-    Route::get('tv-categories', [App\Http\Controllers\Api\TvCategoryController::class, 'index'])->name('tv-categories.index');
-    // Route::get('tv-categories/active', [App\Http\Controllers\Api\TvCategoryController::class, 'active'])->name('tv-categories.active');
-    // Route::get('tv-categories/{tvCategory}', [App\Http\Controllers\Api\TvCategoryController::class, 'show'])->name('tv-categories.show');
-    
-    // TV routes (GET only)
-    Route::get('tvs', [App\Http\Controllers\Api\TvController::class, 'index'])->name('tvs.index');
-    // Route::get('tvs/categories', [App\Http\Controllers\Api\TvController::class, 'categories'])->name('tvs.categories');
-    // Route::get('tvs/{tv}', [App\Http\Controllers\Api\TvController::class, 'show'])->name('tvs.show');
-    // Route::get('tvs/category/{category}', [App\Http\Controllers\Api\TvController::class, 'byCategory'])->name('tvs.by-category');
+    // (TV GET endpoints moved to public section above)
 });
