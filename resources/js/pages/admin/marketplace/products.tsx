@@ -93,7 +93,7 @@ export default function ProductsPage({ products, filters, categories }: Products
       style: 'currency',
       currency: 'IDR',
       minimumFractionDigits: 0,
-    }).format(price / 100);
+    }).format(price);
   };
 
   const getStatusBadge = (status: string) => {

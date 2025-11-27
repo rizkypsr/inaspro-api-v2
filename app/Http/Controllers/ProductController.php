@@ -80,9 +80,8 @@ class ProductController extends Controller
             'variants.*.status' => 'required|in:active,inactive',
             'variants.*.image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
-
-        // Convert base_price to integer (cents)
-        $validated['base_price'] = (int) ($validated['base_price'] * 100);
+        // Normalisasi base_price ke integer Rupiah (tanpa sen)
+        $validated['base_price'] = $this->normalizeRupiah($validated['base_price']);
 
         DB::beginTransaction();
         
@@ -92,8 +91,8 @@ class ProductController extends Controller
 
             // Create variants
             foreach ($validated['variants'] as $index => $variantData) {
-                // Convert variant price to integer (cents)
-                $variantData['price'] = (int) ($variantData['price'] * 100);
+                // Normalisasi harga varian ke integer Rupiah (tanpa sen)
+                $variantData['price'] = $this->normalizeRupiah($variantData['price']);
                 $variantData['product_id'] = $product->id;
                 
                 // Handle image upload
@@ -189,9 +188,8 @@ class ProductController extends Controller
             'variants.*.status' => 'required|in:active,inactive',
             'variants.*.image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
-
-        // Convert base_price to integer (cents)
-        $validated['base_price'] = (int) ($validated['base_price'] * 100);
+        // Normalisasi base_price ke integer Rupiah (tanpa sen)
+        $validated['base_price'] = $this->normalizeRupiah($validated['base_price']);
 
         DB::beginTransaction();
         
@@ -203,10 +201,10 @@ class ProductController extends Controller
             $existingVariantIds = $product->variants->pluck('id')->toArray();
             $submittedVariantIds = [];
 
-            // Update or create variants
+            // Update atau buat varian
             foreach ($validated['variants'] as $index => $variantData) {
-                // Convert variant price to integer (cents)
-                $variantData['price'] = (int) ($variantData['price'] * 100);
+                // Normalisasi harga varian ke integer Rupiah (tanpa sen)
+                $variantData['price'] = $this->normalizeRupiah($variantData['price']);
                 $variantData['product_id'] = $product->id;
                 
                 // Handle image upload
@@ -291,5 +289,40 @@ class ProductController extends Controller
 
         return redirect()->route('admin.marketplace.products.index')
             ->with('success', 'Product permanently deleted.');
+    }
+
+    /**
+     * Normalisasi input uang Indonesia (Rupiah) menjadi integer tanpa sen.
+     * Menerima angka atau string dengan pemisah ribuan/decimal Indonesia.
+     */
+    private function normalizeRupiah($value): int
+    {
+        if ($value === null) {
+            return 0;
+        }
+
+        // Jika sudah numeric, bulatkan ke integer Rupiah
+        if (is_numeric($value)) {
+            $amount = (float) $value;
+            if ($amount < 0) {
+                $amount = 0;
+            }
+            return (int) round($amount);
+        }
+
+        // Jika string: hilangkan karakter selain digit dan pemisah, lalu konversi
+        $str = (string) $value;
+        // Buang teks seperti 'Rp', spasi, dll. tapi pertahankan digit, koma, titik, minus
+        $str = preg_replace('/[^0-9,.-]/', '', $str);
+        // Hilangkan pemisah ribuan (.) khas Indonesia
+        $str = str_replace('.', '', $str);
+        // Ubah koma menjadi titik agar bisa di-cast sebagai float
+        $str = str_replace(',', '.', $str);
+
+        $amount = (float) $str;
+        if ($amount < 0) {
+            $amount = 0;
+        }
+        return (int) round($amount);
     }
 }
