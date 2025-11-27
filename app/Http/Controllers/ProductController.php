@@ -79,9 +79,13 @@ class ProductController extends Controller
             'variants.*.stock' => 'required|integer|min:0',
             'variants.*.status' => 'required|in:active,inactive',
             'variants.*.image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+        ], [
+            'variants.*.sku.unique' => 'The SKU :input has already been taken.',
+            'variants.*.image.max' => 'The image may not be greater than 2 MB.',
         ]);
+
         // Normalisasi base_price ke integer Rupiah (tanpa sen)
-        $validated['base_price'] = $this->normalizeRupiah($validated['base_price']);
+        // $validated['base_price'] = $this->normalizeRupiah($validated['base_price']);
 
         DB::beginTransaction();
         
@@ -92,7 +96,7 @@ class ProductController extends Controller
             // Create variants
             foreach ($validated['variants'] as $index => $variantData) {
                 // Normalisasi harga varian ke integer Rupiah (tanpa sen)
-                $variantData['price'] = $this->normalizeRupiah($variantData['price']);
+                // $variantData['price'] = $this->normalizeRupiah($variantData['price']);
                 $variantData['product_id'] = $product->id;
                 
                 // Handle image upload
@@ -189,7 +193,7 @@ class ProductController extends Controller
             'variants.*.image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
         // Normalisasi base_price ke integer Rupiah (tanpa sen)
-        $validated['base_price'] = $this->normalizeRupiah($validated['base_price']);
+        // $validated['base_price'] = $this->normalizeRupiah($validated['base_price']);
 
         DB::beginTransaction();
         
@@ -204,7 +208,7 @@ class ProductController extends Controller
             // Update atau buat varian
             foreach ($validated['variants'] as $index => $variantData) {
                 // Normalisasi harga varian ke integer Rupiah (tanpa sen)
-                $variantData['price'] = $this->normalizeRupiah($variantData['price']);
+                // $variantData['price'] = $this->normalizeRupiah($variantData['price']);
                 $variantData['product_id'] = $product->id;
                 
                 // Handle image upload

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Head, Link, router, usePage, useForm } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -20,6 +20,17 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -39,6 +50,7 @@ import {
   ArrowUpDown,
   Plus
 } from 'lucide-react';
+import { Loader2, Trash } from 'lucide-react';
 
 interface FantasyEvent {
   id: number;
@@ -84,6 +96,7 @@ interface FantasyPageProps {
 
 export default function FantasyIndex({ fantasyEvents, filters }: FantasyPageProps) {
   const { flash } = usePage().props as any;
+  const deleteForm = useForm({});
   const [searchTerm, setSearchTerm] = useState(filters.search || '');
   const [statusFilter, setStatusFilter] = useState(filters.status || 'all');
   const [dateFromFilter, setDateFromFilter] = useState(filters.date_from || '');
@@ -355,6 +368,51 @@ export default function FantasyIndex({ fantasyEvents, filters }: FantasyPageProp
                                   View Details
                                 </Link>
                               </DropdownMenuItem>
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <DropdownMenuItem className="text-red-600 focus:text-red-600">
+                                    <Trash className="mr-2 h-4 w-4" />
+                                    Delete
+                                  </DropdownMenuItem>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Delete event?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      This action cannot be undone. This will permanently delete
+                                      "{event.title}" and all related data.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction
+                                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                      onClick={() =>
+                                        deleteForm.delete(`/admin/fantasy/${event.id}` as const, {
+                                          preserveScroll: true,
+                                          onSuccess: () => {
+                                            // Refresh the list to reflect deletion
+                                            router.get('/admin/fantasy', {
+                                              search: searchTerm || undefined,
+                                              status: statusFilter === 'all' ? undefined : statusFilter,
+                                              date_from: dateFromFilter || undefined,
+                                              date_to: dateToFilter || undefined,
+                                              sort_by: sortBy,
+                                              sort_order: sortOrder,
+                                            });
+                                          },
+                                        })
+                                      }
+                                      disabled={deleteForm.processing}
+                                    >
+                                      {deleteForm.processing && (
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                      )}
+                                      Delete
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </TableCell>

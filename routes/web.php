@@ -86,6 +86,7 @@ Route::middleware(['auth', 'verified', 'role:Admin'])->prefix('admin')->name('ad
     Route::get('/fantasy/create', [FantasyController::class, 'create'])->name('fantasy.create');
     Route::post('/fantasy', [FantasyController::class, 'store'])->name('fantasy.store');
     Route::get('/fantasy/{fantasyEvent}', [FantasyController::class, 'show'])->name('fantasy.show');
+    Route::delete('/fantasy/{fantasyEvent}', [FantasyController::class, 'destroy'])->name('fantasy.destroy');
     Route::put('/fantasy/{fantasyEvent}/status', [FantasyController::class, 'updateStatus'])->name('fantasy.updateStatus');
     Route::put('/fantasy/tshirts/{tshirtOption}', [FantasyController::class, 'updateTshirt'])->name('fantasy.update-tshirt');
     Route::put('/fantasy/teams/{team}', [FantasyController::class, 'updateTeam'])->name('fantasy.teams.update');

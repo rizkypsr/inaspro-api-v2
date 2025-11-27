@@ -599,4 +599,26 @@ class FantasyController extends Controller
             return back()->with('error', 'Gagal memperbarui status pembayaran. Silakan coba lagi.');
         }
     }
+
+    /**
+     * Remove the specified fantasy event from storage.
+     */
+    public function destroy(FantasyEvent $fantasyEvent)
+    {
+        try {
+            DB::beginTransaction();
+
+            // Deleting the event will cascade to teams, shoes, registrations, and payments
+            $fantasyEvent->delete();
+
+            DB::commit();
+
+            return redirect()->route('admin.fantasy.index')
+                ->with('success', 'Fantasy event deleted successfully.');
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error('Failed to delete fantasy event: ' . $e->getMessage());
+            return back()->with('error', 'Failed to delete fantasy event.');
+        }
+    }
 }
