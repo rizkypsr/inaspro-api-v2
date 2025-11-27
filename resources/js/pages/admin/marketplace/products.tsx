@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -57,6 +57,7 @@ export default function ProductsPage({ products, filters, categories }: Products
   const [searchTerm, setSearchTerm] = useState(filters.search || '');
   const [selectedCategory, setSelectedCategory] = useState(filters.category_id || '');
   const [selectedStatus, setSelectedStatus] = useState(filters.status || '');
+  const { delete: deleteProduct, processing, errors, reset } = useForm({});
 
   const handleSearch = () => {
     router.get('/admin/marketplace/products', {
@@ -74,9 +75,15 @@ export default function ProductsPage({ products, filters, categories }: Products
   };
 
   const handleDelete = (productId: number) => {
-    router.delete(`/admin/marketplace/products/${productId}`, {
+    deleteProduct(`/admin/marketplace/products/${productId}`, {
+      preserveScroll: true,
       onSuccess: () => {
-        // Success message will be handled by the backend
+        // Reload products list only to reflect deletion
+        router.reload({ only: ['products'] });
+        reset();
+      },
+      onError: () => {
+        // Keep dialog open; error will be shown below using errors.error
       }
     });
   };
@@ -255,10 +262,16 @@ export default function ProductsPage({ products, filters, categories }: Products
                                     <AlertDialogAction
                                       onClick={() => handleDelete(product.id)}
                                       className="bg-red-600 hover:bg-red-700"
+                                      disabled={processing}
                                     >
-                                      Delete
+                                      {processing ? 'Deleting...' : 'Delete'}
                                     </AlertDialogAction>
                                   </AlertDialogFooter>
+                                  {errors && (errors as any).error && (
+                                    <div className="text-sm text-red-600 mt-2">
+                                      {(errors as any).error}
+                                    </div>
+                                  )}
                                 </AlertDialogContent>
                               </AlertDialog>
                             </DropdownMenuContent>

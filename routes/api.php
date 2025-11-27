@@ -152,3 +152,7 @@ Route::middleware('auth:sanctum')->group(function () {
     
     // (TV GET endpoints moved to public section above)
 });
+
+
+// Msl routes
+Route::get('msl/matches', [App\Http\Controllers\Api\MslController::class, 'getMatches'])->name('msl.get-matches');

@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
-import { ArrowLeft, Edit, Trash2, Eye } from 'lucide-react';
+import { ArrowLeft, Edit, Trash2, Eye, Loader2 } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import AppLayout from '@/layouts/app-layout';
 
 interface Category {
@@ -41,6 +42,25 @@ interface Props {
 
 export default function ShowProduct({ product }: Props) {
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
+    const [deleteError, setDeleteError] = useState<string | null>(null);
+
+    const { delete: destroy, processing } = useForm({});
+
+    const handleDelete = () => {
+        setDeleteError(null);
+        const confirmed = window.confirm('Hapus produk ini? Tindakan tidak dapat dibatalkan.');
+        if (!confirmed) return;
+
+        destroy(`/admin/marketplace/products/${product.id}` as any, {
+            preserveScroll: true,
+            onSuccess: () => {
+                router.visit('/admin/marketplace/products');
+            },
+            onError: () => {
+                setDeleteError('Gagal menghapus produk. Silakan coba lagi.');
+            },
+        });
+    };
 
     const formatPrice = (price: string) => {
         return new Intl.NumberFormat('id-ID', {
@@ -94,12 +114,23 @@ export default function ShowProduct({ product }: Props) {
                                 Edit
                             </Button>
                         </Link>
-                        <Button variant="destructive" size="sm">
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Delete
+                        <Button variant="destructive" size="sm" onClick={handleDelete} disabled={processing}>
+                            {processing ? (
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            ) : (
+                                <Trash2 className="h-4 w-4 mr-2" />
+                            )}
+                            {processing ? 'Deleting...' : 'Delete'}
                         </Button>
                     </div>
                 </div>
+
+                {deleteError && (
+                    <Alert variant="destructive">
+                        <AlertTitle>Gagal Menghapus</AlertTitle>
+                        <AlertDescription>{deleteError}</AlertDescription>
+                    </Alert>
+                )}
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div className="lg:col-span-2 space-y-6">

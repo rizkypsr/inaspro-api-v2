@@ -262,12 +262,7 @@ class ProductController extends Controller
      */
     public function destroy(Product $product)
     {
-        // Check if product has variants
-        if ($product->variants()->count() > 0) {
-            return redirect()->back()
-                ->with('error', 'Cannot delete product that has variants. Please delete all variants first.');
-        }
-
+        // Soft delete the product regardless of variants
         $product->delete();
 
         return redirect()->route('admin.marketplace.products.index')
